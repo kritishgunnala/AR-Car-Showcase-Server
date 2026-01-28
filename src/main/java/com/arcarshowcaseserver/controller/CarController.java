@@ -3,6 +3,7 @@ package com.arcarshowcaseserver.controller;
 import com.arcarshowcaseserver.dto.MakeDTO;
 import com.arcarshowcaseserver.dto.ModelDTO;
 import com.arcarshowcaseserver.dto.TrimDTO;
+import com.arcarshowcaseserver.dto.YearDTO;
 import com.arcarshowcaseserver.service.CarService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -20,6 +21,12 @@ import java.util.List;
 public class CarController {
 
     private final CarService carService;
+
+    @GetMapping("/years")
+    public YearDTO getYears() {
+        System.out.println("Controller: getYears called");
+        return carService.getYears();
+    }
 
     @GetMapping("/makes")
     public List<MakeDTO> getMakes(
@@ -39,6 +46,7 @@ public class CarController {
             @RequestParam String make,
             @RequestParam(required = false) String model,
             @RequestParam(required = false) @Min(1900) @Max(2100) Integer year) {
+        System.out.println("Controller: getTrims called for make=" + make + ", model=" + model + ", year=" + year);
         return carService.getTrims(make, model, year);
     }
 }

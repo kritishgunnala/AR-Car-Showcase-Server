@@ -14,4 +14,7 @@ public class CarQueryResponse<T> {
     
     @JsonProperty("Trims")
     private T trims;
+
+    @JsonProperty("Years")
+    private YearDTO years;
 }

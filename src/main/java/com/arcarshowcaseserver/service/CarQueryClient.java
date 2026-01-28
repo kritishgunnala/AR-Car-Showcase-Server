@@ -4,6 +4,7 @@ import com.arcarshowcaseserver.dto.CarQueryResponse;
 import com.arcarshowcaseserver.dto.MakeDTO;
 import com.arcarshowcaseserver.dto.ModelDTO;
 import com.arcarshowcaseserver.dto.TrimDTO;
+import com.arcarshowcaseserver.dto.YearDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -24,9 +25,25 @@ public class CarQueryClient {
     private final RestTemplate restTemplate;
     private static final String BASE_URL = "https://www.carqueryapi.com/api/0.3/";
 
+    public YearDTO getYears() {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(BASE_URL)
+                .queryParam("cmd", "getYears");
+
+        ResponseEntity<CarQueryResponse<Object>> response = restTemplate.exchange(
+                builder.toUriString(),
+                HttpMethod.GET,
+                new HttpEntity<>(getHeaders()),
+                new ParameterizedTypeReference<CarQueryResponse<Object>>() {}
+        );
+
+        log.info("getYears response: {}", response.getBody());
+        return response.getBody() != null ? response.getBody().getYears() : null;
+    }
+
     public List<MakeDTO> getMakes(Integer year) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(BASE_URL)
-                .queryParam("cmd", "getMakes");
+                .queryParam("cmd", "getMakes")
+                .queryParam("sold_in_us", "1");
         if (year != null) {
             builder.queryParam("year", year);
         }
@@ -62,6 +79,7 @@ public class CarQueryClient {
                 new ParameterizedTypeReference<CarQueryResponse<List<ModelDTO>>>() {}
         );
 
+        log.info("getModels response: {}", response.getBody());
         return response.getBody() != null ? response.getBody().getModels() : List.of();
     }
 
@@ -83,12 +101,13 @@ public class CarQueryClient {
                 new ParameterizedTypeReference<CarQueryResponse<List<TrimDTO>>>() {}
         );
 
+        log.info("getTrims response: {}", response.getBody());
         return response.getBody() != null ? response.getBody().getTrims() : List.of();
     }
 
     private HttpHeaders getHeaders() {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+        headers.set("User-Agent", "Mozilla/5.0");
         return headers;
     }
 }
