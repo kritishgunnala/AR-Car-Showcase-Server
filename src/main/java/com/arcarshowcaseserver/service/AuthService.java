@@ -52,7 +52,9 @@ public class AuthService {
                 userDetails.getId(),
                 userDetails.getUsername(),
                 userDetails.getEmail(),
-                roles);
+                roles,
+                userDetails.getPhoneNumber(),
+                userDetails.getProfilePic());
     }
 
     @Transactional
@@ -68,6 +70,9 @@ public class AuthService {
         User user = new User(signUpRequest.getUsername(),
                 signUpRequest.getEmail(),
                 encoder.encode(signUpRequest.getPassword()));
+        
+        user.setPhoneNumber(signUpRequest.getPhoneNumber());
+        user.setProfilePic(signUpRequest.getProfilePic());
 
         Set<String> strRoles = signUpRequest.getRole();
         Set<Role> roles = new HashSet<>();

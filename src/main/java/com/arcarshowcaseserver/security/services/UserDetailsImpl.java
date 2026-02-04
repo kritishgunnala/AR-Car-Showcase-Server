@@ -2,6 +2,7 @@ package com.arcarshowcaseserver.security.services;
 
 import com.arcarshowcaseserver.model.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
@@ -28,6 +29,13 @@ public class UserDetailsImpl implements UserDetails {
     @JsonIgnore
     private String password;
 
+    @Getter
+    private String phoneNumber;
+
+    @Getter
+    @Column(columnDefinition = "text")
+    private String profilePic;
+
     private Collection<? extends GrantedAuthority> authorities;
 
     public static UserDetailsImpl build(User user) {
@@ -40,6 +48,8 @@ public class UserDetailsImpl implements UserDetails {
                 user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),
+                user.getPhoneNumber(),
+                user.getProfilePic(),
                 authorities);
     }
 
