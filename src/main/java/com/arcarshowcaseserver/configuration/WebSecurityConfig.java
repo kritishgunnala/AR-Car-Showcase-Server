@@ -58,8 +58,11 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth -> 
                     auth.requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/models/**").permitAll()
-                        .requestMatchers("/api/cars/**").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/api/cars/allcars").permitAll()
+                        .requestMatchers("/api/cars/allBrands").permitAll()
+                        .requestMatchers("/api/cars/{brand}/models").permitAll()
+                        .requestMatchers("/api/cars/{brand}/{model}/variants").permitAll()
+                        .anyRequest().permitAll()
                 );
 
         http.authenticationProvider(authenticationProvider());
