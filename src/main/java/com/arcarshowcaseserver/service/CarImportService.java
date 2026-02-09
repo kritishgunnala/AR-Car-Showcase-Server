@@ -9,20 +9,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class CarImportService {
 
     private final CarRepository carRepository;
     private final ObjectMapper objectMapper;
+    private final com.arcarshowcaseserver.configuration.CarModelConfig carModelConfig;
 
-    public CarImportService(CarRepository carRepository, ObjectMapper objectMapper) {
+    public CarImportService(CarRepository carRepository, ObjectMapper objectMapper, com.arcarshowcaseserver.configuration.CarModelConfig carModelConfig) {
         this.carRepository = carRepository;
         this.objectMapper = objectMapper;
+        this.carModelConfig = carModelConfig;
     }
 
     @Transactional
@@ -52,7 +51,12 @@ public class CarImportService {
         car.setMaxPriceLakhs(node.path("max_price_lakhs").asDouble(0.0));
         car.setRating(node.path("rating").asDouble(0.0));
 
-        // LITERALLY MAP EVERY SPEC VARIABLE AS IT IS
+        String brand = car.getBrand();
+        String model = car.getModel();
+        String assignedModel = resolveModelFile(brand, model);
+        
+        car.setModelUrl("/api/static/models/" + assignedModel);
+
         JsonNode specsNode = node.path("specs");
         Iterator<Map.Entry<String, JsonNode>> specCategories = specsNode.fields();
         while (specCategories.hasNext()) {
@@ -72,7 +76,6 @@ public class CarImportService {
             }
         }
 
-        // Variants
         JsonNode variantsNode = node.path("variants");
         if (variantsNode.isArray()) {
             for (JsonNode vNode : variantsNode) {
@@ -97,7 +100,6 @@ public class CarImportService {
             }
         }
 
-        // Images
         JsonNode imagesNode = node.path("images");
         if (imagesNode.has("exterior")) {
             for (JsonNode n : imagesNode.get("exterior")) {
@@ -120,5 +122,35 @@ public class CarImportService {
         }
 
         return car;
+    }
+
+    private String resolveModelFile(String brand, String model) {
+        if (brand == null || model == null) return "car.glb";
+
+        String normalizedBrand = brand.toLowerCase().replaceAll("[^a-z0-9]", "");
+
+        for (com.arcarshowcaseserver.configuration.CarModelConfig.ModelEntry entry : carModelConfig.getModels().values()) {
+            if (entry.getBrand() == null) continue;
+
+            String configBrand = entry.getBrand().toLowerCase().replaceAll("[^a-z0-9]", "");
+            
+            if (normalizedBrand.equals(configBrand)) {
+                String normalizedModel = model.toLowerCase().replaceAll("[^a-z0-9]", "");
+                
+                if (entry.getModelNames() != null) {
+                    for (String configModelName : entry.getModelNames()) {
+                        String normalizedConfigModel = configModelName.toLowerCase().replaceAll("[^a-z0-9]", "");
+                        
+                        System.out.println("Checking: " + normalizedModel + " vs " + normalizedConfigModel);
+                        if (normalizedModel.contains(normalizedConfigModel)) {
+                            System.out.println("MATCHED! " + entry.getFile());
+                            return entry.getFile();
+                        }
+                    }
+                }
+            }
+        }
+        System.out.println("NO MATCH for " + brand + " " + model + " -> Defaulting to car.glb");
+        return "car.glb";
     }
 }

@@ -31,6 +31,7 @@ public class Car {
     private double minPriceLakhs = 0.0;
     private double maxPriceLakhs = 0.0;
     private double rating = 0.0;
+    private String modelUrl = "";
     @JsonManagedReference
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CarDetail> details = new ArrayList<>();
