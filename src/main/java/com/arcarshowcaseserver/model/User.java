@@ -46,6 +46,23 @@ public class User {
     @Column(columnDefinition = "TEXT")
     private String profilePic;
 
+    @ElementCollection
+    private Set<String> favBrands = new HashSet<>();
+
+    @ElementCollection
+    private Set<String> preferredBodyTypes = new HashSet<>();
+    
+    @ElementCollection
+    private Set<String> preferredFuelTypes = new HashSet<>();
+
+    @ElementCollection
+    private Set<String> preferredTransmissions = new HashSet<>();
+
+    @Size(max = 50)
+    private String drivingCondition;
+
+    private Double maxBudget;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(  name = "user_roles", 
         joinColumns = @JoinColumn(name = "user_id"), 

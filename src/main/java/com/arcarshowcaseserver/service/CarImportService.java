@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -14,6 +16,7 @@ import java.util.*;
 @Service
 public class CarImportService {
 
+    private static final Logger log = LoggerFactory.getLogger(CarImportService.class);
     private final CarRepository carRepository;
     private final ObjectMapper objectMapper;
     private final com.arcarshowcaseserver.configuration.CarModelConfig carModelConfig;
@@ -141,16 +144,16 @@ public class CarImportService {
                     for (String configModelName : entry.getModelNames()) {
                         String normalizedConfigModel = configModelName.toLowerCase().replaceAll("[^a-z0-9]", "");
                         
-                        System.out.println("Checking: " + normalizedModel + " vs " + normalizedConfigModel);
+                        log.debug("Checking: {} vs {}", normalizedModel, normalizedConfigModel);
                         if (normalizedModel.contains(normalizedConfigModel)) {
-                            System.out.println("MATCHED! " + entry.getFile());
+                            log.info("MATCHED! {}", entry.getFile());
                             return entry.getFile();
                         }
                     }
                 }
             }
         }
-        System.out.println("NO MATCH for " + brand + " " + model + " -> Defaulting to car.glb");
+        log.warn("NO MATCH for {} {} -> Defaulting to car.glb", brand, model);
         return "car.glb";
     }
 }

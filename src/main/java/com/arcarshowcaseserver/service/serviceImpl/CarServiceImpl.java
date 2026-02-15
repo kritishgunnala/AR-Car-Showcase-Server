@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -18,6 +20,7 @@ import java.util.Optional;
 @Service
 public class CarServiceImpl implements CarService {
 
+    private static final Logger log = LoggerFactory.getLogger(CarServiceImpl.class);
     private final CarVariantRepository carVariantRepository;
     private final CarRepository carRepository;
 
@@ -63,7 +66,7 @@ public class CarServiceImpl implements CarService {
     @Override
     public ResponseEntity<?> getAllModels(String brand) {
         List<String> carsBrands = carRepository.findModelsByBrandIgnoreCase(brand);
-        System.out.println(carsBrands);
+        log.debug("Found {} models for brand {}", carsBrands.size(), brand);
         if (carsBrands.isEmpty()){
             return new ResponseEntity<>(String.format("No Model Found in %s",brand) , HttpStatus.NOT_FOUND);
         }
@@ -191,31 +194,17 @@ public class CarServiceImpl implements CarService {
                 .replaceAll("\\s+", " ")
                 .trim();
     }
+
+    @Override
+    public com.arcarshowcaseserver.dto.CarOptionsDTO getCarOptions() {
+        return new com.arcarshowcaseserver.dto.CarOptionsDTO(
+            carRepository.findDistinctBrands(),
+            carRepository.findDistinctBodyTypes(),
+            carRepository.findDistinctFuelTypes(),
+            carRepository.findDistinctTransmissionTypes()
+        );
+    }
 }
 
 
 
-//    @Override
-//    public ResponseEntity<?> GetVariant(String brand, String model, String variant) {
-//        Optional<Car> carOpt =
-//                carRepository.findByBrandAndModel(brand.trim(), model.trim());
-//        if (carOpt.isEmpty()) {
-//            return ResponseEntity
-//                    .status(HttpStatus.NOT_FOUND)
-//                    .body("Car not found");
-//        }
-//        Long carId = carOpt.get().getId();
-//        System.out.println(carId);
-//        Optional<CarVariant> variantOpt =
-//                carVariantRepo.findByCarIdAndVariant(
-//                        carId,
-//                        variant.trim()
-//                );
-//        if (variantOpt.isEmpty()) {
-//            return ResponseEntity
-//                    .status(HttpStatus.NOT_FOUND)
-//                    .body("Invalid variant");
-//        }
-//        System.out.println(variantOpt.get());
-//        return ResponseEntity.ok(variantOpt.get());
-//    }

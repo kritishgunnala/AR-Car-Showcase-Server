@@ -13,6 +13,8 @@ import com.arcarshowcaseserver.security.services.UserDetailsImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -34,6 +36,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CustomizationService {
 
+    private static final Logger log = LoggerFactory.getLogger(CustomizationService.class);
     private final CustomizationRepository customizationRepository;
     private final CarRepository carRepository;
     private final UserRepository userRepository;
@@ -84,7 +87,7 @@ public class CustomizationService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(pythonRequest, headers);
 
-        System.out.println("[CustomizationService] Requesting generation from: " + generateUrl);
+        log.info("[CustomizationService] Requesting generation from: {}", generateUrl);
         ResponseEntity<Map> response;
         try {
             response = restTemplate.postForEntity(generateUrl, entity, Map.class);
@@ -139,7 +142,7 @@ public class CustomizationService {
                                     .orElse(car.getImages().isEmpty() ? "" : car.getImages().get(0).getImageUrl());
                         }
                     } catch (NumberFormatException e) {
-                        System.out.println("NumberFormatException");
+                        log.error("NumberFormatException while parsing vehicle ID: {}", c.getVehicleId());
                     }
                     return new CustomizationResponse(c.getId(), c.getModelUrl(), brand, model, image, c.getVehicleId(), c.getMaterials());
                 })
